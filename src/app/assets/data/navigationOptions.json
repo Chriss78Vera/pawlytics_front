@@ -1,0 +1,7 @@
+{
+  "roleLabel": {
+    "admin": "Administrador",
+    "veterinario": "Veterinario",
+    "cliente": "Cliente"
+  }
+}

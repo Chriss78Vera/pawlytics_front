@@ -1,10 +1,5 @@
 import { Brain, FileText, Home, LogOut, PawPrint, User, Users } from 'lucide-react';
-
-const roleLabel = {
-  admin: 'Administrador',
-  veterinario: 'Veterinario',
-  cliente: 'Cliente',
-};
+import navigationOptions from '@/app/assets/data/navigationOptions.json';
 
 export function DashboardNav({ user, activeSection, canSeeAi, onNavigate, onLogout }) {
   const navItems = [
@@ -58,7 +53,7 @@ export function DashboardNav({ user, activeSection, canSeeAi, onNavigate, onLogo
           </div>
           <div className="flex-1 min-w-0">
             <div className="font-semibold truncate">{user.name}</div>
-            <div className="text-xs text-white/60">{roleLabel[user.role]}</div>
+            <div className="text-xs text-white/60">{navigationOptions.roleLabel[user.role]}</div>
           </div>
           <button onClick={onLogout} className="p-2 hover:bg-white/10 rounded-xl transition-colors" title="Cerrar sesion">
             <LogOut className="w-5 h-5" />

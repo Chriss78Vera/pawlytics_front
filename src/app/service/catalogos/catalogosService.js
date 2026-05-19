@@ -1,4 +1,4 @@
-import { http } from '../../config/httpClient.js';
+import { http } from '@/app/config/httpClient.js';
 
 export const catalogosService = {
   getTipos: () => http.get('/tipos'),

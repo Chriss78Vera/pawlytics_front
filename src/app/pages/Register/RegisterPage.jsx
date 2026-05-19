@@ -1,20 +1,11 @@
 import { useState } from 'react';
 import { ArrowLeft, Calendar, Home, IdCard, Lock, Mail, Phone, User } from 'lucide-react';
-import { pawlyticsApi } from '../../service/pawlyticsApi.js';
-
-const initialForm = {
-  firstName: 'Christopher',
-  lastName: 'Vera',
-  address: 'Av. Principal 123',
-  phone: '0999999999',
-  identification: '1723456789',
-  birthDate: '2000-05-15',
-  email: '',
-  password: '',
-};
+import { IconTextInput } from '@/app/components/forms/IconTextInput.jsx';
+import registerOptions from '@/app/assets/data/registerOptions.json';
+import { pawlyticsApi } from '@/app/service/pawlyticsApi.js';
 
 export function RegisterPage({ onBack, onRegister }) {
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(registerOptions.initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const updateField = (field, value) => {
@@ -58,14 +49,14 @@ export function RegisterPage({ onBack, onRegister }) {
           </div>
 
           <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-5">
-            <FormInput icon={User} label="Nombre" value={form.firstName} onChange={(value) => updateField('firstName', value)} />
-            <FormInput icon={User} label="Apellido" value={form.lastName} onChange={(value) => updateField('lastName', value)} />
-            <FormInput icon={Home} label="Dirección" value={form.address} onChange={(value) => updateField('address', value)} />
-            <FormInput icon={Phone} label="Teléfono" value={form.phone} onChange={(value) => updateField('phone', value)} />
-            <FormInput icon={IdCard} label="Identificación" value={form.identification} onChange={(value) => updateField('identification', value)} />
-            <FormInput icon={Calendar} label="Fecha de nacimiento" type="date" value={form.birthDate} onChange={(value) => updateField('birthDate', value)} />
-            <FormInput icon={Mail} label="Email" type="email" value={form.email} onChange={(value) => updateField('email', value)} />
-            <FormInput icon={Lock} label="Contraseña" type="password" value={form.password} onChange={(value) => updateField('password', value)} />
+            <IconTextInput icon={User} label="Nombre" value={form.firstName} onChange={(value) => updateField('firstName', value)} />
+            <IconTextInput icon={User} label="Apellido" value={form.lastName} onChange={(value) => updateField('lastName', value)} />
+            <IconTextInput icon={Home} label="Direccion" value={form.address} onChange={(value) => updateField('address', value)} />
+            <IconTextInput icon={Phone} label="Telefono" value={form.phone} onChange={(value) => updateField('phone', value)} />
+            <IconTextInput icon={IdCard} label="Identificacion" value={form.identification} onChange={(value) => updateField('identification', value)} />
+            <IconTextInput icon={Calendar} label="Fecha de nacimiento" type="date" value={form.birthDate} onChange={(value) => updateField('birthDate', value)} />
+            <IconTextInput icon={Mail} label="Email" type="email" value={form.email} onChange={(value) => updateField('email', value)} />
+            <IconTextInput icon={Lock} label="Contrasena" type="password" value={form.password} onChange={(value) => updateField('password', value)} />
 
             <button
               type="submit"
@@ -78,23 +69,5 @@ export function RegisterPage({ onBack, onRegister }) {
         </div>
       </div>
     </div>
-  );
-}
-
-function FormInput({ icon: Icon, label, value, onChange, type = 'text' }) {
-  return (
-    <label className="block">
-      <span className="text-sm font-semibold text-[#462255]">{label}</span>
-      <div className="relative mt-2">
-        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#62A87C]" />
-        <input
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          type={type}
-          required
-          className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#7EE081]"
-        />
-      </div>
-    </label>
   );
 }

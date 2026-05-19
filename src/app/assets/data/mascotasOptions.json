@@ -1,0 +1,34 @@
+{
+  "fallbackMascotas": [
+    {
+      "id": 1,
+      "name": "Firulais",
+      "color": "Cafe",
+      "sex": "Macho",
+      "type": { "name": "Perro" },
+      "breed": { "name": "Mestizo" },
+      "ownerData": { "firstName": "Christopher", "lastName": "Vera" }
+    }
+  ],
+  "initialFilters": {
+    "search": "",
+    "typeId": "",
+    "breedId": "",
+    "sex": "",
+    "owner": ""
+  },
+  "initialForm": {
+    "typeId": "",
+    "breedId": "",
+    "name": "",
+    "birthDate": "",
+    "color": "",
+    "sex": "",
+    "weight": "",
+    "particularSigns": ""
+  },
+  "sexOptions": [
+    { "value": "Macho", "label": "Macho" },
+    { "value": "Hembra", "label": "Hembra" }
+  ]
+}

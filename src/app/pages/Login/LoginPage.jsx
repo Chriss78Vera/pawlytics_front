@@ -1,35 +1,8 @@
 import { useState } from 'react';
 import { AlertCircle, ArrowLeft, Lock, Mail, PawPrint } from 'lucide-react';
-import { pawlyticsApi } from '../../service/pawlyticsApi.js';
-
-const roleById = {
-  1: 'admin',
-  2: 'cliente',
-  3: 'veterinario',
-};
-
-const getLoginUserDataId = (loginResponse) => {
-  return loginResponse.userData ?? loginResponse.userDat ?? loginResponse.userDataId;
-};
-
-const getErrorMessage = (error) => {
-  if (!error.response) {
-    return 'Error con la conexión, intente más tarde';
-  }
-
-  const status = error.response.status;
-  const apiMessage = error.response.data?.message ?? error.response.data?.error ?? '';
-
-  if (status === 403 && apiMessage.toLowerCase().includes('inactivo')) {
-    return 'Usuario inactivo. Contacta al administrador.';
-  }
-
-  if (status === 401 || apiMessage.toLowerCase().includes('contraseña')) {
-    return 'Contraseña incorrecta';
-  }
-
-  return 'Error con la conexión, intente más tarde';
-};
+import roleById from '@/app/assets/data/authRoles.json';
+import { getLoginErrorMessage, getLoginUserDataId } from '@/app/functions/authUtils.js';
+import { pawlyticsApi } from '@/app/service/pawlyticsApi.js';
 
 export function LoginPage({ onBack, onLogin, onRegister }) {
   const [email, setEmail] = useState('');
@@ -70,7 +43,7 @@ export function LoginPage({ onBack, onLogin, onRegister }) {
         name: `${userData.firstName} ${userData.lastName}`,
       });
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      setErrorMessage(getLoginErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -103,7 +76,7 @@ export function LoginPage({ onBack, onLogin, onRegister }) {
               <PawPrint className="w-7 h-7 text-[#462255]" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-[#462255]">Iniciar sesión</h1>
+              <h1 className="text-3xl font-bold text-[#462255]">Iniciar sesion</h1>
               <p className="text-sm text-[#313B72]">Accede a Pawlytics</p>
             </div>
           </div>
@@ -125,7 +98,7 @@ export function LoginPage({ onBack, onLogin, onRegister }) {
             </label>
 
             <label className="block">
-              <span className="text-sm font-semibold text-[#462255]">Contraseña</span>
+              <span className="text-sm font-semibold text-[#462255]">Contrasena</span>
               <div className="relative mt-2">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#62A87C]" />
                 <input

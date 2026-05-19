@@ -1,4 +1,4 @@
-import { http } from '../../config/httpClient.js';
+import { http } from '@/app/config/httpClient.js';
 
 const listConfig = ({ page = 1, limit = 5, filters = {} } = {}) => ({
   params: filters,

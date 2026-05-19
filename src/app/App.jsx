@@ -1,15 +1,10 @@
 import { useEffect, useState } from 'react';
-import { LandingPage } from './pages/Landing/LandingPage.jsx';
-import { LoginPage } from './pages/Login/LoginPage.jsx';
-import { RegisterPage } from './pages/Register/RegisterPage.jsx';
-import { DashboardPage } from './pages/Dashboard/DashboardPage.jsx';
-import { pawlyticsApi } from './service/pawlyticsApi.js';
-
-const roleById = {
-  1: 'admin',
-  2: 'cliente',
-  3: 'veterinario',
-};
+import { LandingPage } from '@/app/pages/Landing/LandingPage.jsx';
+import { LoginPage } from '@/app/pages/Login/LoginPage.jsx';
+import { RegisterPage } from '@/app/pages/Register/RegisterPage.jsx';
+import { DashboardPage } from '@/app/pages/Dashboard/DashboardPage.jsx';
+import { pawlyticsApi } from '@/app/service/pawlyticsApi.js';
+import roleById from '@/app/assets/data/authRoles.json';
 
 const getStoredUser = () => {
   try {

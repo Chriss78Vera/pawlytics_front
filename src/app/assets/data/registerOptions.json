@@ -1,0 +1,12 @@
+{
+  "initialForm": {
+    "firstName": "",
+    "lastName": "",
+    "address": "",
+    "phone": "",
+    "identification": "",
+    "birthDate": "",
+    "email": "",
+    "password": ""
+  }
+}

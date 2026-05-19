@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { pawlyticsApi } from '../../service/pawlyticsApi.js';
+import { pawlyticsApi } from '@/app/service/pawlyticsApi.js';
 import { normalizeList, normalizeSelectOptions } from './SearchableSelect.jsx';
 
 export function usePetCatalogOptions(typeId) {
@@ -8,6 +8,7 @@ export function usePetCatalogOptions(typeId) {
   const [isLoadingTypes, setIsLoadingTypes] = useState(true);
   const [isLoadingBreeds, setIsLoadingBreeds] = useState(false);
 
+  // Obtiene los tipos de mascota una sola vez para poblar selectores reutilizables.
   useEffect(() => {
     let isActive = true;
     setIsLoadingTypes(true);
@@ -34,6 +35,7 @@ export function usePetCatalogOptions(typeId) {
     };
   }, []);
 
+  // Carga razas dependientes cuando cambia el tipo seleccionado.
   useEffect(() => {
     if (!typeId) {
       setBreeds([]);
