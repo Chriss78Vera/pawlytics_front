@@ -3,8 +3,9 @@ import { pawlyticsApi } from '@/app/service/pawlyticsApi.js';
 import { normalizeMascotas, normalizePagination } from '@/app/pages/Mascotas/shared/mascotasUtils.js';
 import clinicalHistoryOptions from '@/app/assets/data/clinicalHistoryOptions.json';
 
-export function useClinicalHistories({ user, selectedPet, initialView }) {
+export function useClinicalHistories({ user, selectedPet, selectedPetId, initialView }) {
   const canCreate = user.role === 'veterinario';
+  const effectiveSelectedPetId = selectedPet?.id ?? selectedPetId;
   const [view, setView] = useState(canCreate && initialView === 'create' ? 'create' : 'list');
   const [histories, setHistories] = useState([]);
   const [selectedHistory, setSelectedHistory] = useState(null);
@@ -32,8 +33,8 @@ export function useClinicalHistories({ user, selectedPet, initialView }) {
 
     try {
       const roleFilters = user.role === 'cliente' ? { userDataId: user.userDataId } : {};
-      const response = selectedPet
-        ? await pawlyticsApi.getClinicalHistoryByPet(selectedPet.id, { page: nextPage, limit: 5, filters })
+      const response = effectiveSelectedPetId
+        ? await pawlyticsApi.getClinicalHistoryByPet(effectiveSelectedPetId, { page: nextPage, limit: 5, filters })
         : await pawlyticsApi.getClinicalHistory({ page: nextPage, limit: 5, filters: { ...filters, ...roleFilters } });
 
       setHistories(Array.isArray(response?.data) ? response.data : []);
@@ -57,7 +58,7 @@ export function useClinicalHistories({ user, selectedPet, initialView }) {
     setView(canCreate && initialView === 'create' ? 'create' : 'list');
     setSelectedHistory(null);
     setPage(1);
-  }, [initialView, selectedPet?.id, canCreate]);
+  }, [initialView, effectiveSelectedPetId, canCreate]);
 
   // Mantiene el listado sincronizado con paginacion y alcance de mascota.
   useEffect(() => {
@@ -66,7 +67,7 @@ export function useClinicalHistories({ user, selectedPet, initialView }) {
     }
 
     loadHistories();
-  }, [page, selectedPet?.id, view]);
+  }, [page, effectiveSelectedPetId, view]);
 
   const applyFilters = () => {
     setPage(1);

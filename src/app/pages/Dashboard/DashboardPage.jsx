@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router';
 import {
   Activity,
   AlertCircle,
@@ -12,6 +13,7 @@ import { DashboardNav } from '@/app/components/DashboardNav.jsx';
 import { MascotasPage } from '@/app/pages/Mascotas/MascotasPage.jsx';
 import { HistorialPage } from '@/app/pages/Historial/HistorialPage.jsx';
 import { UsuariosPage } from '@/app/pages/Usuarios/UsuariosPage.jsx';
+import { AnalisisPage } from '@/app/pages/Analisis/AnalisisPage.jsx';
 import dashboardOptions from '@/app/assets/data/dashboardOptions.json';
 import { dashboardPermissions, formatMetricValue } from '@/app/functions/dashboardUtils.js';
 import { useDashboardSummary } from '@/app/hooks/useDashboardSummary.js';
@@ -20,13 +22,21 @@ import { ChartCard } from './components/ChartCard.jsx';
 import { MetricCard } from './components/MetricCard.jsx';
 
 export function DashboardPage({ user, onLogout }) {
-  const [activeSection, setActiveSection] = useState('dashboard');
+  const navigate = useNavigate();
+  const location = useLocation();
   const [selectedHistoryPet, setSelectedHistoryPet] = useState(null);
   const canSeeAi = dashboardPermissions.seeAi(user.role);
   const canManagePets = dashboardPermissions.managePets(user.role);
   const canManageHistory = dashboardPermissions.manageHistory(user.role);
-  const isCreatingHistory = activeSection === 'historial-create'
-    || (activeSection === 'historial' && user.role === 'veterinario' && selectedHistoryPet);
+  const activeSection = getActiveSection(location.pathname);
+  const selectedPetId = getSelectedHistoryPetId(location.pathname);
+  const routeSelectedPet = selectedPetId
+    ? selectedHistoryPet && String(selectedHistoryPet.id) === String(selectedPetId)
+      ? selectedHistoryPet
+      : { id: Number(selectedPetId) }
+    : null;
+  const isCreatingHistory = location.pathname.endsWith('/historial/nuevo')
+    || (activeSection === 'historial' && user.role === 'veterinario' && selectedPetId);
 
   return (
     <div className="h-screen overflow-hidden bg-gradient-to-br from-[#C3F3C0]/10 via-white to-[#7EE081]/5 flex">
@@ -42,7 +52,7 @@ export function DashboardPage({ user, onLogout }) {
         canSeeAi={canSeeAi}
         onNavigate={(section) => {
           setSelectedHistoryPet(null);
-          setActiveSection(section);
+          navigate(section === 'dashboard' ? '/dashboard' : `/dashboard/${section}`);
         }}
         onLogout={onLogout}
       />
@@ -51,37 +61,53 @@ export function DashboardPage({ user, onLogout }) {
         <DashboardHeader
           canManagePets={canManagePets}
           canManageHistory={canManageHistory && !isCreatingHistory}
-          onCreatePet={() => setActiveSection('mascotas-create')}
+          onCreatePet={() => navigate('/dashboard/mascotas/nuevo')}
           onCreateHistory={() => {
             setSelectedHistoryPet(null);
-            setActiveSection('historial-create');
+            navigate('/dashboard/historial/nuevo');
           }}
         />
 
         <div className="flex-1 overflow-y-auto p-8">
-          {activeSection === 'mascotas' ? (
-            <MascotasPage
-              user={user}
-              onHistory={(pet) => {
-                setSelectedHistoryPet(pet);
-                setActiveSection('historial');
-              }}
+          <Routes>
+            <Route index element={<DashboardHome user={user} canSeeAi={canSeeAi} />} />
+            <Route
+              path="mascotas"
+              element={
+                <MascotasPage
+                  user={user}
+                  onHistory={(pet) => {
+                    setSelectedHistoryPet(pet);
+                    navigate(`/dashboard/historial/pet/${pet.id}`, { state: { pet } });
+                  }}
+                />
+              }
             />
-          ) : activeSection === 'mascotas-create' ? (
-            <MascotasPage user={user} initialView="create" />
-          ) : activeSection === 'historial' ? (
-            <HistorialPage user={user} selectedPet={selectedHistoryPet} />
-          ) : activeSection === 'historial-create' ? (
-            <HistorialPage user={user} selectedPet={selectedHistoryPet} initialView="create" />
-          ) : activeSection === 'usuarios' && user.role === 'admin' ? (
-            <UsuariosPage />
-          ) : (
-            <DashboardHome user={user} canSeeAi={canSeeAi} />
-          )}
+            <Route path="mascotas/nuevo" element={<MascotasPage user={user} initialView="create" />} />
+            <Route path="historial" element={<HistorialPage user={user} selectedPet={null} />} />
+            <Route path="historial/pet/:petId" element={<HistorialPage user={user} selectedPet={routeSelectedPet} selectedPetId={selectedPetId} />} />
+            <Route path="historial/nuevo" element={<HistorialPage user={user} selectedPet={null} initialView="create" />} />
+            <Route path="usuarios" element={user.role === 'admin' ? <UsuariosPage /> : <Navigate to="/dashboard" replace />} />
+            <Route path="analisis" element={canSeeAi ? <AnalisisPage user={user} /> : <Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
         </div>
       </main>
     </div>
   );
+}
+
+function getActiveSection(pathname) {
+  if (pathname.includes('/dashboard/mascotas')) return 'mascotas';
+  if (pathname.includes('/dashboard/historial')) return 'historial';
+  if (pathname.includes('/dashboard/usuarios')) return 'usuarios';
+  if (pathname.includes('/dashboard/analisis')) return 'analisis';
+  return 'dashboard';
+}
+
+function getSelectedHistoryPetId(pathname) {
+  const match = pathname.match(/\/dashboard\/historial\/pet\/([^/]+)/);
+  return match?.[1] ?? null;
 }
 
 function DashboardHome({ user, canSeeAi }) {

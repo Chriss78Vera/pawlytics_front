@@ -6,15 +6,15 @@ import { HistoryDetail } from './components/HistoryDetail.jsx';
 import { HistoryFilters } from './components/HistoryFilters.jsx';
 import { HistoryTable } from './components/HistoryTable.jsx';
 
-export function HistorialPage({ user, selectedPet, initialView = 'list' }) {
+export function HistorialPage({ user, selectedPet, selectedPetId, initialView = 'list' }) {
   return (
     <HistorialProvider user={user} selectedPet={selectedPet}>
-      <HistorialPageContent user={user} selectedPet={selectedPet} initialView={initialView} />
+      <HistorialPageContent user={user} selectedPet={selectedPet} selectedPetId={selectedPetId} initialView={initialView} />
     </HistorialProvider>
   );
 }
 
-function HistorialPageContent({ user, selectedPet, initialView }) {
+function HistorialPageContent({ user, selectedPet, selectedPetId, initialView }) {
   const {
     canCreate,
     view,
@@ -34,7 +34,11 @@ function HistorialPageContent({ user, selectedPet, initialView }) {
     handleCreated,
     showDetail,
     backToList,
-  } = useClinicalHistories({ user, selectedPet, initialView });
+  } = useClinicalHistories({ user, selectedPet, selectedPetId, initialView });
+  const displayPet = selectedPet?.name
+    ? selectedPet
+    : petById[String(selectedPetId ?? selectedPet?.id)] ?? selectedPet;
+  const isPetScoped = Boolean(selectedPet || selectedPetId);
 
   if (view === 'create' && canCreate) {
     return (
@@ -55,7 +59,7 @@ function HistorialPageContent({ user, selectedPet, initialView }) {
 
         <ClinicalHistoryForm
           pets={pets}
-          selectedPet={selectedPet}
+          selectedPet={displayPet}
           onCancel={() => setView('list')}
           onCreated={handleCreated}
         />
@@ -79,8 +83,8 @@ function HistorialPageContent({ user, selectedPet, initialView }) {
         <div>
           <h1 className="text-3xl font-bold text-[#462255]">Historial clinico</h1>
           <p className="text-[#313B72]">
-            {selectedPet
-              ? `Historiales registrados para ${selectedPet.name}.`
+            {isPetScoped
+              ? `Historiales registrados para ${displayPet?.name ?? `mascota #${selectedPetId ?? selectedPet.id}`}.`
               : user.role === 'cliente'
               ? 'Consulta el historial de tus mascotas.'
               : 'Consulta y filtra los historiales registrados.'}
@@ -109,8 +113,8 @@ function HistorialPageContent({ user, selectedPet, initialView }) {
         onChange={(field, value) => setFilters((current) => ({ ...current, [field]: value }))}
         onSubmit={applyFilters}
         showOwner={user.role !== 'cliente'}
-        isPetScoped={Boolean(selectedPet)}
-        selectedPet={selectedPet}
+        isPetScoped={isPetScoped}
+        selectedPet={displayPet}
       />
 
       <HistoryTable

@@ -1,7 +1,7 @@
-import { FileText, PawPrint } from 'lucide-react';
+import { Brain, FileText, PawPrint } from 'lucide-react';
 import { getOwnerName } from './mascotasUtils.js';
 
-export function MascotasTable({ mascotas, isLoading, pagination, onPageChange, onHistory }) {
+export function MascotasTable({ mascotas, isLoading, pagination, onPageChange, onHistory, onDiagnosis }) {
   const page = pagination?.page ?? 1;
   const totalPages = pagination?.totalPages ?? 1;
 
@@ -27,7 +27,7 @@ export function MascotasTable({ mascotas, isLoading, pagination, onPageChange, o
               <TableHead>Género</TableHead>
               <TableHead>Tipo</TableHead>
               <TableHead>Raza</TableHead>
-              <TableHead>Historial</TableHead>
+              <TableHead>Acciones</TableHead>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -53,13 +53,26 @@ export function MascotasTable({ mascotas, isLoading, pagination, onPageChange, o
                   <TableCell>{mascota.type?.name ?? mascota.type?.nombre ?? '-'}</TableCell>
                   <TableCell>{mascota.breed?.name ?? mascota.breed?.nombre ?? '-'}</TableCell>
                   <TableCell>
-                    <button
-                      onClick={() => onHistory?.(mascota)}
-                      className="px-4 py-2 bg-[#313B72] text-white rounded-xl font-semibold hover:bg-[#462255] transition-colors inline-flex items-center gap-2"
-                    >
-                      <FileText className="w-4 h-4" />
-                      Historial
-                    </button>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onHistory?.(mascota)}
+                        className="inline-flex items-center gap-2 rounded-xl bg-[#313B72] px-4 py-2 font-semibold text-white transition-colors hover:bg-[#462255]"
+                      >
+                        <FileText className="w-4 h-4" />
+                        Historial
+                      </button>
+                      {onDiagnosis && (
+                        <button
+                          type="button"
+                          onClick={() => onDiagnosis(mascota)}
+                          className="inline-flex items-center gap-2 rounded-xl bg-[#62A87C] px-4 py-2 font-bold text-[#462255] transition-colors hover:bg-[#7EE081]"
+                        >
+                          <Brain className="w-4 h-4" />
+                          Diagnostico
+                        </button>
+                      )}
+                    </div>
                   </TableCell>
                 </tr>
               ))

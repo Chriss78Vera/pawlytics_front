@@ -4,9 +4,11 @@ import { MascotaForm } from '@/app/pages/Mascotas/components/MascotaForm';
 import { useMascotasList } from '@/app/hooks/useMascotasList.js';
 import { MascotasFilters } from '@/app/pages/Mascotas/shared/MascotasFilters.jsx';
 import { MascotasTable } from '@/app/pages/Mascotas/shared/MascotasTable.jsx';
+import { DiagnosticosMascota } from './DiagnosticosMascota.jsx';
 
 export function ClienteMascotasPage({ user, initialView = 'list', onHistory }) {
   const [view, setView] = useState(initialView);
+  const [selectedMascota, setSelectedMascota] = useState(null);
   const {
     mascotas,
     filters,
@@ -38,6 +40,18 @@ export function ClienteMascotasPage({ user, initialView = 'list', onHistory }) {
           onCreated={handleMascotaCreated}
         />
       </div>
+    );
+  }
+
+  if (view === 'diagnosis' && selectedMascota) {
+    return (
+      <DiagnosticosMascota
+        mascota={selectedMascota}
+        onBack={() => {
+          setSelectedMascota(null);
+          setView('list');
+        }}
+      />
     );
   }
 
@@ -81,6 +95,10 @@ export function ClienteMascotasPage({ user, initialView = 'list', onHistory }) {
         pagination={pagination}
         onPageChange={setPage}
         onHistory={onHistory}
+        onDiagnosis={(mascota) => {
+          setSelectedMascota(mascota);
+          setView('diagnosis');
+        }}
       />
     </div>
   );
