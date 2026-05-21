@@ -1,14 +1,23 @@
 import { useState } from 'react';
 import { AlertCircle, Plus, RefreshCw } from 'lucide-react';
 import { MascotaForm } from '@/app/pages/Mascotas/components/MascotaForm';
+import { useNotifications } from '@/app/context/NotificationsContext.jsx';
 import { useMascotasList } from '@/app/hooks/useMascotasList.js';
 import { MascotasFilters } from '@/app/pages/Mascotas/shared/MascotasFilters.jsx';
 import { MascotasTable } from '@/app/pages/Mascotas/shared/MascotasTable.jsx';
+import { pawlyticsApi } from '@/app/service/pawlyticsApi.js';
 import { DiagnosticosMascota } from './DiagnosticosMascota.jsx';
 
-export function ClienteMascotasPage({ user, initialView = 'list', onHistory }) {
+export function ClienteMascotasPage({
+  user,
+  initialView = 'list',
+  onHistory,
+  title = 'Mascotas',
+  description = 'Estas son tus mascotas registradas.',
+}) {
   const [view, setView] = useState(initialView);
   const [selectedMascota, setSelectedMascota] = useState(null);
+  const { notify } = useNotifications();
   const {
     mascotas,
     filters,
@@ -25,6 +34,49 @@ export function ClienteMascotasPage({ user, initialView = 'list', onHistory }) {
   const handleMascotaCreated = (createdMascota) => {
     prependMascota(createdMascota);
     setView('list');
+    notify({
+      title: 'Mascota registrada',
+      message: 'La mascota se creo correctamente.',
+      type: 'success',
+    });
+  };
+
+  const downloadClinicalReport = async (mascota) => {
+    const reportWindow = window.open('', '_blank');
+
+    try {
+      if (!reportWindow) {
+        throw new Error('El navegador bloqueo la ventana del reporte.');
+      }
+
+      reportWindow.document.write('<p style="font-family: Arial; padding: 24px;">Generando reporte Pawlytics...</p>');
+      const response = await fetch(pawlyticsApi.getMascotaClinicalReportUrl(mascota.id));
+
+      if (!response.ok) {
+        throw new Error('No se pudo generar el reporte.');
+      }
+
+      const html = await response.text();
+
+      reportWindow.document.open();
+      reportWindow.document.write(html);
+      reportWindow.document.close();
+      reportWindow.focus();
+      setTimeout(() => reportWindow.print(), 500);
+
+      notify({
+        title: 'Reporte listo',
+        message: `El reporte de ${mascota.name} esta listo para guardar como PDF.`,
+        type: 'success',
+      });
+    } catch (error) {
+      reportWindow?.close();
+      notify({
+        title: 'Error al generar reporte',
+        message: error.message || 'No se pudo descargar el reporte clinico.',
+        type: 'error',
+      });
+    }
   };
 
   if (view === 'create') {
@@ -59,8 +111,8 @@ export function ClienteMascotasPage({ user, initialView = 'list', onHistory }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#462255]">Mascotas</h1>
-          <p className="text-[#313B72]">Estas son tus mascotas registradas.</p>
+          <h1 className="text-3xl font-bold text-[#462255]">{title}</h1>
+          <p className="text-[#313B72]">{description}</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -99,6 +151,7 @@ export function ClienteMascotasPage({ user, initialView = 'list', onHistory }) {
           setSelectedMascota(mascota);
           setView('diagnosis');
         }}
+        onDownloadReport={downloadClinicalReport}
       />
     </div>
   );

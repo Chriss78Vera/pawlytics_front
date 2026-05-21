@@ -1,7 +1,7 @@
-import { Brain, FileText, PawPrint } from 'lucide-react';
+import { Brain, Download, FileText, PawPrint } from 'lucide-react';
 import { getOwnerName } from './mascotasUtils.js';
 
-export function MascotasTable({ mascotas, isLoading, pagination, onPageChange, onHistory, onDiagnosis }) {
+export function MascotasTable({ mascotas, isLoading, pagination, onPageChange, onHistory, onDiagnosis, onDownloadReport }) {
   const page = pagination?.page ?? 1;
   const totalPages = pagination?.totalPages ?? 1;
 
@@ -70,6 +70,15 @@ export function MascotasTable({ mascotas, isLoading, pagination, onPageChange, o
                         >
                           <Brain className="w-4 h-4" />
                           Diagnostico
+                        </button>
+                      )}
+                      {onDownloadReport && (
+                        <button
+                          type="button"
+                          onClick={() => onDownloadReport(mascota)}
+                          className="inline-flex items-center gap-2 rounded-xl bg-[#C3F3C0] px-4 py-2 font-bold text-[#462255] transition-colors hover:bg-[#7EE081]"
+                        >
+                          <Download className="w-4 h-4" />
                         </button>
                       )}
                     </div>

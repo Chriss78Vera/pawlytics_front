@@ -11,6 +11,7 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } 
 import { DashboardHeader } from '@/app/components/DashboardHeader.jsx';
 import { DashboardNav } from '@/app/components/DashboardNav.jsx';
 import { MascotasPage } from '@/app/pages/Mascotas/MascotasPage.jsx';
+import { ClienteMascotasPage } from '@/app/pages/Mascotas/Cliente/ClienteMascotasPage.jsx';
 import { HistorialPage } from '@/app/pages/Historial/HistorialPage.jsx';
 import { UsuariosPage } from '@/app/pages/Usuarios/UsuariosPage.jsx';
 import { AnalisisPage } from '@/app/pages/Analisis/AnalisisPage.jsx';
@@ -70,7 +71,19 @@ export function DashboardPage({ user, onLogout }) {
 
         <div className="flex-1 overflow-y-auto p-8">
           <Routes>
-            <Route index element={<DashboardHome user={user} canSeeAi={canSeeAi} />} />
+            <Route
+              index
+              element={
+                <DashboardHome
+                  user={user}
+                  canSeeAi={canSeeAi}
+                  onHistory={(pet) => {
+                    setSelectedHistoryPet(pet);
+                    navigate(`/dashboard/historial/pet/${pet.id}`, { state: { pet } });
+                  }}
+                />
+              }
+            />
             <Route
               path="mascotas"
               element={
@@ -110,7 +123,7 @@ function getSelectedHistoryPetId(pathname) {
   return match?.[1] ?? null;
 }
 
-function DashboardHome({ user, canSeeAi }) {
+function DashboardHome({ user, canSeeAi, onHistory }) {
   const { summary, isLoading, errorMessage } = useDashboardSummary(user);
   const metrics = summary.metrics;
   const weightData = summary.weightData.length ? summary.weightData : dashboardOptions.fallbackWeightData;
@@ -132,33 +145,42 @@ function DashboardHome({ user, canSeeAi }) {
         <MetricCard icon={FileText} value={formatMetricValue(metrics.totalHistories, isLoading)} label="Historiales disponibles" />
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <ChartCard title="Peso promedio (kg)" icon={TrendingUp}>
-            <LineChart data={weightData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#C3F3C0" />
-              <XAxis dataKey="month" stroke="#313B72" fontSize={12} />
-              <YAxis stroke="#313B72" fontSize={12} />
-              <Tooltip contentStyle={{ backgroundColor: '#fff', border: '2px solid #7EE081', borderRadius: '12px' }} />
-              <Line type="monotone" dataKey="peso" stroke="#7EE081" strokeWidth={3} dot={{ fill: '#62A87C', r: 5 }} />
-            </LineChart>
-          </ChartCard>
-
-          <ChartCard title="Sintomas frecuentes" icon={Activity}>
-            <BarChart data={symptomsData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#C3F3C0" />
-              <XAxis dataKey="symptom" stroke="#313B72" fontSize={11} />
-              <YAxis stroke="#313B72" fontSize={12} />
-              <Tooltip contentStyle={{ backgroundColor: '#fff', border: '2px solid #7EE081', borderRadius: '12px' }} />
-              <Bar dataKey="count" fill="#7EE081" radius={[10, 10, 0, 0]} />
-            </BarChart>
-          </ChartCard>
-        </div>
-
+      {user.role === 'cliente' ? (
+        <ClienteMascotasPage
+          user={user}
+          onHistory={onHistory}
+          title="Mis mascotas"
+          description="Consulta tus mascotas, diagnosticos y reportes clinicos desde aqui."
+        />
+      ) : (
         <div className="space-y-6">
-          {canSeeAi && <AiAnalysisCard totalHistories={metrics.totalHistories} healthAlerts={metrics.healthAlerts} />}
+          <div className="grid gap-6 xl:grid-cols-2">
+            <ChartCard title="Peso promedio (kg)" icon={TrendingUp}>
+              <LineChart data={weightData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#C3F3C0" />
+                <XAxis dataKey="month" stroke="#313B72" fontSize={12} />
+                <YAxis stroke="#313B72" fontSize={12} />
+                <Tooltip contentStyle={{ backgroundColor: '#fff', border: '2px solid #7EE081', borderRadius: '12px' }} />
+                <Line type="monotone" dataKey="peso" stroke="#7EE081" strokeWidth={3} dot={{ fill: '#62A87C', r: 5 }} />
+              </LineChart>
+            </ChartCard>
+
+            <ChartCard title="Sintomas frecuentes" icon={Activity}>
+              <BarChart data={symptomsData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#C3F3C0" />
+                <XAxis dataKey="symptom" stroke="#313B72" fontSize={11} />
+                <YAxis stroke="#313B72" fontSize={12} />
+                <Tooltip contentStyle={{ backgroundColor: '#fff', border: '2px solid #7EE081', borderRadius: '12px' }} />
+                <Bar dataKey="count" fill="#7EE081" radius={[10, 10, 0, 0]} />
+              </BarChart>
+            </ChartCard>
+          </div>
+
+          <div>
+            {canSeeAi && <AiAnalysisCard totalHistories={metrics.totalHistories} healthAlerts={metrics.healthAlerts} />}
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

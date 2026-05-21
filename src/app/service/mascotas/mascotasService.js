@@ -1,4 +1,4 @@
-import { http } from '@/app/config/httpClient.js';
+import { API_BASE_URL, http } from '@/app/config/httpClient.js';
 
 const listConfig = ({ page = 1, limit = 5, filters = {} } = {}) => ({
   params: filters,
@@ -12,4 +12,5 @@ export const mascotasService = {
   getMascotas: (options) => http.get('/mascotas', listConfig(options)),
   getMascotasByUserData: (userDataId, options) => http.get(`/mascotas/user-data/${userDataId}`, listConfig(options)),
   createMascota: (payload) => http.post('/mascotas', payload),
+  getMascotaClinicalReportUrl: (petId) => `${API_BASE_URL}/mascotas/${petId}/clinical-report`,
 };

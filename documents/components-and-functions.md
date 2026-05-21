@@ -209,6 +209,7 @@ Para modificar:
 - Nueva seccion de menu: `DashboardNav.jsx`.
 - Nueva ruta privada: `DashboardPage.jsx`.
 - Reglas de visibilidad: `dashboardUtils.js`.
+- Notificaciones de la campana: `src/app/context/NotificationsContext.jsx` y `DashboardHeader.jsx`.
 
 ## Mascotas
 
@@ -226,12 +227,14 @@ Componentes:
 Reglas:
 - Cliente ve sus mascotas.
 - Cliente puede consultar diagnosticos revisados.
+- Cliente descarga un reporte imprimible desde el boton `PDF`; el HTML viene del backend y se guarda usando la opcion del navegador "Guardar como PDF".
 - Admin/veterinario pueden navegar al historial.
 
 Para modificar:
 - Campos del formulario: `MascotaForm.jsx` y `mascotasUtils.buildMascotaPayload`.
 - Columnas de tabla: `MascotasTable.jsx`.
 - Filtros: `MascotasFilters.jsx` y `useMascotasList.js`.
+- Descarga de reporte y notificacion: `ClienteMascotasPage.jsx`.
 
 ## Historial clinico
 

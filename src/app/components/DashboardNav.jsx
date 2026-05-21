@@ -4,7 +4,7 @@ import navigationOptions from '@/app/assets/data/navigationOptions.json';
 export function DashboardNav({ user, activeSection, canSeeAi, onNavigate, onLogout }) {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, visible: true },
-    { id: 'mascotas', label: 'Mascotas', icon: PawPrint, visible: user.role === 'admin' || user.role === 'cliente' || user.role === 'veterinario' },
+    { id: 'mascotas', label: 'Mascotas', icon: PawPrint, visible: user.role === 'admin' || user.role === 'veterinario' },
     { id: 'historial', label: 'Historial', icon: FileText, visible: true },
     { id: 'usuarios', label: 'Usuarios', icon: Users, visible: user.role === 'admin' },
     { id: 'analisis', label: 'Analisis IA', icon: Brain, visible: canSeeAi, highlight: true },

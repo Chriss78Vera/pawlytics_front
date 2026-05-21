@@ -120,7 +120,7 @@ export function useAiAnalysis(user) {
         state: true,
       });
       setAnalysis(updated);
-      setMessage('Analisis revisado y guardado en Mongo correctamente.');
+      setMessage('Analisis revisado y guardado correctamente.');
     } catch (err) {
       setError(err?.response?.data?.message || 'No se pudo guardar la revision del veterinario.');
     } finally {
