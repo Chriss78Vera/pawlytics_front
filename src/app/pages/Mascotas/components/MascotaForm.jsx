@@ -6,6 +6,7 @@ import { TextAreaInput, TextInput } from '@/app/components/forms/FormControls.js
 import { usePetCatalogOptions } from '@/app/components/selectors/usePetCatalogOptions.js';
 import mascotasOptions from '@/app/assets/data/mascotasOptions.json';
 import { buildMascotaPayload } from '@/app/functions/mascotasUtils.js';
+import { validateMascotaForm } from '@/app/functions/formValidations.js';
 
 export function MascotaForm({ userDataId, onCancel, onCreated }) {
   const [form, setForm] = useState(mascotasOptions.initialForm);
@@ -35,6 +36,12 @@ export function MascotaForm({ userDataId, onCancel, onCreated }) {
     event.preventDefault();
 
     if (isSubmitDisabled) {
+      return;
+    }
+
+    const validationErrors = validateMascotaForm(form);
+    if (validationErrors.length) {
+      setMessage(validationErrors.join(' '));
       return;
     }
 
@@ -94,7 +101,7 @@ export function MascotaForm({ userDataId, onCancel, onCreated }) {
           options={breedOptions}
         />
         <TextInput label="Nombre" value={form.name} onChange={(value) => updateField('name', value)} />
-        <TextInput label="Fecha de nacimiento" type="date" value={form.birthDate} onChange={(value) => updateField('birthDate', value)} />
+        <TextInput label="Fecha de nacimiento" type="date" max={new Date().toISOString().slice(0, 10)} value={form.birthDate} onChange={(value) => updateField('birthDate', value)} />
         <TextInput label="Color" value={form.color} onChange={(value) => updateField('color', value)} />
         <SearchableSelect
           label="Sexo"
@@ -105,7 +112,7 @@ export function MascotaForm({ userDataId, onCancel, onCreated }) {
           emptyMessage="No se encontraron opciones."
           options={mascotasOptions.sexOptions}
         />
-        <TextInput label="Peso (kg)" type="number" min="0" step="0.1" value={form.weight} onChange={(value) => updateField('weight', value)} />
+        <TextInput label="Peso (kg)" type="number" min="0.1" max="120" step="0.1" value={form.weight} onChange={(value) => updateField('weight', value)} />
         <TextAreaInput
           label="Señas particulares"
           value={form.particularSigns}

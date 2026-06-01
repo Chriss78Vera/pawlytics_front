@@ -3,6 +3,7 @@ import { AlertCircle, ArrowLeft, Calendar, Home, IdCard, Lock, Mail, Phone, User
 import { IconTextInput } from '@/app/components/forms/IconTextInput.jsx';
 import registerOptions from '@/app/assets/data/registerOptions.json';
 import { pawlyticsApi } from '@/app/service/pawlyticsApi.js';
+import { validateRegisterForm } from '@/app/functions/formValidations.js';
 
 export function RegisterPage({ onBack, onRegister }) {
   const [form, setForm] = useState(registerOptions.initialForm);
@@ -10,13 +11,25 @@ export function RegisterPage({ onBack, onRegister }) {
   const [errorMessage, setErrorMessage] = useState('');
 
   const updateField = (field, value) => {
-    setForm((current) => ({ ...current, [field]: value }));
+    const nextValue = ['identification', 'phone'].includes(field)
+      ? value.replace(/\D/g, '')
+      : value;
+
+    setErrorMessage('');
+    setForm((current) => ({ ...current, [field]: nextValue }));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setIsSubmitting(true);
     setErrorMessage('');
+
+    const validationErrors = validateRegisterForm(form);
+    if (validationErrors.length) {
+      setErrorMessage(validationErrors.join(' '));
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       const { user, userData } = await pawlyticsApi.registerClient(form);
@@ -75,8 +88,24 @@ export function RegisterPage({ onBack, onRegister }) {
             <IconTextInput icon={User} label="Nombre" value={form.firstName} onChange={(value) => updateField('firstName', value)} />
             <IconTextInput icon={User} label="Apellido" value={form.lastName} onChange={(value) => updateField('lastName', value)} />
             <IconTextInput icon={Home} label="Direccion" value={form.address} onChange={(value) => updateField('address', value)} />
-            <IconTextInput icon={Phone} label="Telefono" value={form.phone} onChange={(value) => updateField('phone', value)} />
-            <IconTextInput icon={IdCard} label="Identificacion" value={form.identification} onChange={(value) => updateField('identification', value)} />
+            <IconTextInput
+              icon={Phone}
+              label="Telefono"
+              value={form.phone}
+              onChange={(value) => updateField('phone', value)}
+              inputMode="numeric"
+              maxLength={9}
+              pattern="[0-9]{9}"
+            />
+            <IconTextInput
+              icon={IdCard}
+              label="Identificacion"
+              value={form.identification}
+              onChange={(value) => updateField('identification', value)}
+              inputMode="numeric"
+              maxLength={10}
+              pattern="[0-9]{10}"
+            />
             <IconTextInput icon={Calendar} label="Fecha de nacimiento" type="date" value={form.birthDate} onChange={(value) => updateField('birthDate', value)} />
             <IconTextInput icon={Mail} label="Email" type="email" value={form.email} onChange={(value) => updateField('email', value)} />
             <IconTextInput icon={Lock} label="Contrasena" type="password" value={form.password} onChange={(value) => updateField('password', value)} />

@@ -2,10 +2,14 @@ import { Plus, Stethoscope, Trash2 } from 'lucide-react';
 import clinicalHistoryOptions from '@/app/assets/data/clinicalHistoryOptions.json';
 import { InputField, SelectField, TextareaField } from './FormFields.jsx';
 
-export function ClinicalRecordsForm({ form, onChange, onVaccineChange, onAddVaccine, onRemoveVaccine, canManage }) {
+export function ClinicalRecordsForm({ form, onChange, onVaccineChange, onAddVaccine, onRemoveVaccine, canManage, selectedPet }) {
   if (!canManage) {
     return null;
   }
+
+  const isMale = String(selectedPet?.sex ?? '').toLowerCase() === 'macho';
+  const today = new Date().toISOString().slice(0, 10);
+  const minClinicalDate = selectedPet?.birthDate || undefined;
 
   return (
     <div className="mt-6 border-t border-[#7EE081]/20 pt-5">
@@ -27,7 +31,17 @@ export function ClinicalRecordsForm({ form, onChange, onVaccineChange, onAddVacc
           onChange={(value) => onChange('sterilization', value)}
           options={clinicalHistoryOptions.sterilizationStates}
         />
-        <InputField label="Partos" type="number" value={form.births} onChange={(value) => onChange('births', value)} />
+        <InputField
+          label="Partos"
+          type="number"
+          min="0"
+          max="30"
+          step="1"
+          value={isMale ? '' : form.births}
+          disabled={isMale}
+          placeholder={isMale ? 'No aplica para macho' : ''}
+          onChange={(value) => onChange('births', value)}
+        />
         <InputField label="Convive con animales" value={form.animals} onChange={(value) => onChange('animals', value)} />
       </div>
 
@@ -43,7 +57,7 @@ export function ClinicalRecordsForm({ form, onChange, onVaccineChange, onAddVacc
           {form.vaccines.map((vaccine, index) => (
             <div key={`vaccine-${index}`} className="grid gap-3 rounded-xl bg-gray-50 p-3 md:grid-cols-[1fr_220px_auto]">
               <InputField label="Tipo de vacuna" value={vaccine.type} onChange={(value) => onVaccineChange(index, 'type', value)} />
-              <InputField label="Fecha" type="date" value={vaccine.date} onChange={(value) => onVaccineChange(index, 'date', value)} />
+              <InputField label="Fecha" type="date" min={minClinicalDate} max={today} value={vaccine.date} onChange={(value) => onVaccineChange(index, 'date', value)} />
               <button type="button" onClick={() => onRemoveVaccine(index)} className="self-end rounded-xl bg-white p-3 text-red-600 ring-1 ring-red-100">
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -57,7 +71,7 @@ export function ClinicalRecordsForm({ form, onChange, onVaccineChange, onAddVacc
           <h4 className="mb-3 font-bold text-[#462255]">Desparasitacion</h4>
           <div className="grid gap-3">
             <InputField label="Tipo" value={form.dewormingType} onChange={(value) => onChange('dewormingType', value)} />
-            <InputField label="Fecha" type="date" value={form.dewormingDate} onChange={(value) => onChange('dewormingDate', value)} />
+            <InputField label="Fecha" type="date" min={minClinicalDate} max={today} value={form.dewormingDate} onChange={(value) => onChange('dewormingDate', value)} />
           </div>
         </div>
 
@@ -65,7 +79,7 @@ export function ClinicalRecordsForm({ form, onChange, onVaccineChange, onAddVacc
           <h4 className="mb-3 font-bold text-[#462255]">Cirugia</h4>
           <div className="grid gap-3">
             <InputField label="Tipo" value={form.surgeryType} onChange={(value) => onChange('surgeryType', value)} />
-            <InputField label="Fecha" type="date" value={form.surgeryDate} onChange={(value) => onChange('surgeryDate', value)} />
+            <InputField label="Fecha" type="date" min={minClinicalDate} max={today} value={form.surgeryDate} onChange={(value) => onChange('surgeryDate', value)} />
             <TextareaField label="Descripcion" value={form.surgeryDescription} onChange={(value) => onChange('surgeryDescription', value)} rows={2} inputClassName="bg-white" />
           </div>
         </div>

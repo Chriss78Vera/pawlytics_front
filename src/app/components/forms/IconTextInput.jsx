@@ -1,4 +1,4 @@
-export function IconTextInput({ icon: Icon, label, value, onChange, type = 'text' }) {
+export function IconTextInput({ icon: Icon, label, value, onChange, type = 'text', ...props }) {
   return (
     <label className="block">
       <span className="text-sm font-semibold text-[#462255]">{label}</span>
@@ -10,6 +10,7 @@ export function IconTextInput({ icon: Icon, label, value, onChange, type = 'text
           type={type}
           required
           className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#7EE081]"
+          {...props}
         />
       </div>
     </label>

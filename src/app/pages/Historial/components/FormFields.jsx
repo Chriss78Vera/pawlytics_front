@@ -1,6 +1,6 @@
 import { SearchableSelect } from '@/app/components/selectors/SearchableSelect.jsx';
 
-export function InputField({ label, value, onChange, type = 'text' }) {
+export function InputField({ label, value, onChange, type = 'text', inputClassName = '', ...props }) {
   return (
     <label className="text-sm font-semibold text-[#462255]">
       {label}
@@ -8,7 +8,8 @@ export function InputField({ label, value, onChange, type = 'text' }) {
         value={value}
         type={type}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-xl bg-gray-50 px-3 py-2 text-[#313B72] outline-none focus:ring-2 focus:ring-[#7EE081]"
+        className={`mt-2 w-full rounded-xl bg-gray-50 px-3 py-2 text-[#313B72] outline-none focus:ring-2 focus:ring-[#7EE081] disabled:cursor-not-allowed disabled:opacity-60 ${inputClassName}`}
+        {...props}
       />
     </label>
   );

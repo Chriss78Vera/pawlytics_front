@@ -5,6 +5,7 @@ import { pawlyticsApi } from '@/app/service/pawlyticsApi.js';
 import { getOwnerName } from '@/app/pages/Mascotas/shared/mascotasUtils.js';
 import clinicalHistoryOptions from '@/app/assets/data/clinicalHistoryOptions.json';
 import { buildClinicalHistoryPayload, createClinicalRecordsIfNeeded } from '@/app/functions/clinicalHistoryPayloads.js';
+import { validateClinicalHistoryForms } from '@/app/functions/formValidations.js';
 import { useHistorialContext } from '@/app/context/HistorialContext.jsx';
 import { ClinicalRecordsForm } from './ClinicalRecordsForm.jsx';
 import { InputField, SelectField, TextareaField } from './FormFields.jsx';
@@ -25,11 +26,21 @@ export function ClinicalHistoryForm({ pets, selectedPet, onCancel, onCreated }) 
   const update = (field, value) => {
     setError('');
     setForm((current) => ({ ...current, [field]: value }));
+
+    if (field === 'id_mascota') {
+      const nextPet = pets.find((pet) => String(pet.id) === String(value));
+      if (String(nextPet?.sex ?? '').toLowerCase() === 'macho') {
+        setClinicalRecordsForm((current) => ({ ...current, births: '' }));
+      }
+    }
   };
 
   const updateClinicalRecord = (field, value) => {
     setError('');
-    setClinicalRecordsForm((current) => ({ ...current, [field]: value }));
+    setClinicalRecordsForm((current) => ({
+      ...current,
+      [field]: field === 'births' && String(selected?.sex ?? '').toLowerCase() === 'macho' ? '' : value,
+    }));
   };
 
   const updateVaccine = (index, field, value) => {
@@ -62,6 +73,17 @@ export function ClinicalHistoryForm({ pets, selectedPet, onCancel, onCreated }) 
     event.preventDefault();
 
     if (!canSubmit) return;
+
+    const validationErrors = validateClinicalHistoryForms({
+      historyForm: form,
+      recordsForm: clinicalRecordsForm,
+      pet: selected,
+    });
+
+    if (validationErrors.length) {
+      setError(validationErrors.join(' '));
+      return;
+    }
 
     const confirmed = window.confirm('Antes de guardar, confirma que todos los datos del historial clinico son correctos. Una vez creado no se podra modificar.');
     if (!confirmed) return;
@@ -107,12 +129,19 @@ export function ClinicalHistoryForm({ pets, selectedPet, onCancel, onCreated }) 
           searchPlaceholder="Buscar mascota..."
           emptyMessage="No hay mascotas disponibles."
         />
-        <InputField label="Fecha de registro" type="date" value={form.fecha_registro} onChange={(value) => update('fecha_registro', value)} />
+        <InputField
+          label="Fecha de registro"
+          type="date"
+          min={selected?.birthDate || undefined}
+          max={new Date().toISOString().slice(0, 10)}
+          value={form.fecha_registro}
+          onChange={(value) => update('fecha_registro', value)}
+        />
         <SelectField label="Tipo" value={form.tipo_registro} onChange={(value) => update('tipo_registro', value)} options={clinicalHistoryOptions.recordTypes} />
-        <InputField label="Peso kg" type="number" value={form.peso} onChange={(value) => update('peso', value)} />
-        <InputField label="Temperatura" type="number" value={form.temperatura} onChange={(value) => update('temperatura', value)} />
-        <InputField label="F. cardiaca" type="number" value={form.frecuencia_cardiaca} onChange={(value) => update('frecuencia_cardiaca', value)} />
-        <InputField label="F. respiratoria" type="number" value={form.frecuencia_respiratoria} onChange={(value) => update('frecuencia_respiratoria', value)} />
+        <InputField label="Peso kg" type="number" min="0.1" max="120" step="0.1" value={form.peso} onChange={(value) => update('peso', value)} />
+        <InputField label="Temperatura" type="number" min="35" max="43" step="0.1" value={form.temperatura} onChange={(value) => update('temperatura', value)} />
+        <InputField label="F. cardiaca" type="number" min="20" max="300" step="1" value={form.frecuencia_cardiaca} onChange={(value) => update('frecuencia_cardiaca', value)} />
+        <InputField label="F. respiratoria" type="number" min="5" max="120" step="1" value={form.frecuencia_respiratoria} onChange={(value) => update('frecuencia_respiratoria', value)} />
         <SelectField
           label="Alimentacion"
           value={form.come_normal ? 'normal' : 'alterada'}
@@ -136,6 +165,7 @@ export function ClinicalHistoryForm({ pets, selectedPet, onCancel, onCreated }) 
         onAddVaccine={addVaccine}
         onRemoveVaccine={removeVaccine}
         canManage={canCreateHistory}
+        selectedPet={selected}
       />
 
       <div className="mt-5 flex gap-3">
