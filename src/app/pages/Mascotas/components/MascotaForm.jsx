@@ -107,7 +107,7 @@ export function MascotaForm({ userDataId, onCancel, onCreated }) {
         />
         <TextInput label="Peso (kg)" type="number" min="0" step="0.1" value={form.weight} onChange={(value) => updateField('weight', value)} />
         <TextAreaInput
-          label="Senas particulares"
+          label="Señas particulares"
           value={form.particularSigns}
           onChange={(value) => updateField('particularSigns', value)}
           placeholder="Mancha blanca en el pecho"

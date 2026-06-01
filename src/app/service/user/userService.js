@@ -7,9 +7,5 @@ export const userService = {
   updateUser: (userId, payload) => http.put(`/users/${userId}`, payload),
   getUserData: (userDataId) => http.get(`/user-data/${userDataId}`),
   createUserData: (payload) => http.post('/user-data', payload),
-  registerClient: (payload) =>
-    http.post('/auth/register', {
-      ...payload,
-      role: 'cliente',
-    }),
+  registerClient: (payload) => http.post('/auth/register', payload),
 };

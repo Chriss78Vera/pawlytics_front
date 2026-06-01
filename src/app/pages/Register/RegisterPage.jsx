@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Calendar, Home, IdCard, Lock, Mail, Phone, User } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Calendar, Home, IdCard, Lock, Mail, Phone, User } from 'lucide-react';
 import { IconTextInput } from '@/app/components/forms/IconTextInput.jsx';
 import registerOptions from '@/app/assets/data/registerOptions.json';
 import { pawlyticsApi } from '@/app/service/pawlyticsApi.js';
@@ -7,6 +7,7 @@ import { pawlyticsApi } from '@/app/service/pawlyticsApi.js';
 export function RegisterPage({ onBack, onRegister }) {
   const [form, setForm] = useState(registerOptions.initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -15,17 +16,29 @@ export function RegisterPage({ onBack, onRegister }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage('');
 
     try {
-      const response = await pawlyticsApi.registerClient(form);
+      const { user, userData } = await pawlyticsApi.registerClient(form);
+      const storedLogin = {
+        userId: user.id,
+        roleId: user.roleId,
+        userDataId: user.userDataId,
+        email: user.email,
+      };
 
-      onRegister(response.user);
-    } catch {
+      localStorage.setItem('pawlytics_login', JSON.stringify(storedLogin));
+
       onRegister({
-        email: form.email,
+        email: user.email,
         role: 'cliente',
-        name: `${form.firstName} ${form.lastName}`,
+        userId: user.id,
+        userDataId: user.userDataId,
+        userData,
+        name: `${userData.firstName} ${userData.lastName}`.trim(),
       });
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message ?? 'No se pudo crear la cuenta. Revisa los datos e intenta de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
@@ -33,6 +46,16 @@ export function RegisterPage({ onBack, onRegister }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-[#C3F3C0]/20 to-[#7EE081]/10 flex items-center justify-center p-6">
+      {errorMessage && (
+        <div className="fixed right-6 top-6 z-50 flex max-w-sm items-start gap-3 rounded-2xl border border-red-200 bg-white px-5 py-4 text-red-700 shadow-2xl">
+          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+          <div>
+            <p className="font-bold">Error</p>
+            <p className="text-sm">{errorMessage}</p>
+          </div>
+        </div>
+      )}
+
       <div className="w-full max-w-3xl">
         <button
           onClick={onBack}
