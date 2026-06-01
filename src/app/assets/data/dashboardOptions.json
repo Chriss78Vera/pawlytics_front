@@ -1,0 +1,15 @@
+{
+  "emptySummary": {
+    "metrics": {
+      "totalPets": 0,
+      "healthAlerts": 0,
+      "recentConsultations": 0,
+      "totalHistories": 0
+    },
+    "weightData": [],
+    "symptomsData": [],
+    "owners": []
+  },
+  "fallbackWeightData": [{ "month": "Sin datos", "peso": 0 }],
+  "fallbackSymptomsData": [{ "symptom": "Sin datos", "count": 0 }]
+}

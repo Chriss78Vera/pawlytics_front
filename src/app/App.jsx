@@ -1,15 +1,11 @@
 import { useEffect, useState } from 'react';
-import { LandingPage } from './pages/Landing/LandingPage.jsx';
-import { LoginPage } from './pages/Login/LoginPage.jsx';
-import { RegisterPage } from './pages/Register/RegisterPage.jsx';
-import { DashboardPage } from './pages/Dashboard/DashboardPage.jsx';
-import { pawlyticsApi } from './service/pawlyticsApi.js';
-
-const roleById = {
-  1: 'admin',
-  2: 'cliente',
-  3: 'veterinario',
-};
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router';
+import { LandingPage } from '@/app/pages/Landing/LandingPage.jsx';
+import { LoginPage } from '@/app/pages/Login/LoginPage.jsx';
+import { RegisterPage } from '@/app/pages/Register/RegisterPage.jsx';
+import { DashboardPage } from '@/app/pages/Dashboard/DashboardPage.jsx';
+import { pawlyticsApi } from '@/app/service/pawlyticsApi.js';
+import roleById from '@/app/assets/data/authRoles.json';
 
 const getStoredUser = () => {
   try {
@@ -35,19 +31,13 @@ const getStoredUser = () => {
 };
 
 export default function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [authUser, setAuthUser] = useState(() => getStoredUser());
-  const [currentView, setCurrentView] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('pawlytics_login')) ? 'dashboard' : 'landing';
-    } catch {
-      localStorage.removeItem('pawlytics_login');
-      return 'landing';
-    }
-  });
 
   const handleLogin = (user) => {
     setAuthUser(user);
-    setCurrentView('dashboard');
+    navigate('/dashboard', { replace: true });
   };
 
   useEffect(() => {
@@ -83,28 +73,39 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem('pawlytics_login');
     setAuthUser(null);
-    setCurrentView('landing');
+    navigate('/', { replace: true });
   };
 
   return (
     <div className="size-full">
-      {currentView === 'landing' && <LandingPage onStart={() => setCurrentView('login')} />}
-      {currentView === 'login' && (
-        <LoginPage
-          onBack={() => setCurrentView('landing')}
-          onLogin={handleLogin}
-          onRegister={() => setCurrentView('register')}
+      <Routes>
+        <Route path="/" element={authUser ? <Navigate to="/dashboard" replace /> : <LandingPage onStart={() => navigate('/login')} />} />
+        <Route
+          path="/login"
+          element={
+            authUser
+              ? <Navigate to="/dashboard" replace />
+              : <LoginPage onBack={() => navigate('/')} onLogin={handleLogin} onRegister={() => navigate('/register')} />
+          }
         />
-      )}
-      {currentView === 'register' && (
-        <RegisterPage
-          onBack={() => setCurrentView('login')}
-          onRegister={handleLogin}
+        <Route
+          path="/register"
+          element={
+            authUser
+              ? <Navigate to="/dashboard" replace />
+              : <RegisterPage onBack={() => navigate('/login')} onRegister={handleLogin} />
+          }
         />
-      )}
-      {currentView === 'dashboard' && authUser && (
-        <DashboardPage user={authUser} onLogout={handleLogout} />
-      )}
+        <Route
+          path="/dashboard/*"
+          element={
+            authUser
+              ? <DashboardPage user={authUser} onLogout={handleLogout} />
+              : <Navigate to="/login" replace state={{ from: location.pathname }} />
+          }
+        />
+        <Route path="*" element={<Navigate to={authUser ? '/dashboard' : '/'} replace />} />
+      </Routes>
     </div>
   );
 }

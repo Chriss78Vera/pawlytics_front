@@ -1,4 +1,4 @@
-import { http } from '../../config/httpClient.js';
+import { http } from '@/app/config/httpClient.js';
 
 export const userService = {
   login: ({ email, password }) => http.post('/users/login', { email, password }),
@@ -7,9 +7,5 @@ export const userService = {
   updateUser: (userId, payload) => http.put(`/users/${userId}`, payload),
   getUserData: (userDataId) => http.get(`/user-data/${userDataId}`),
   createUserData: (payload) => http.post('/user-data', payload),
-  registerClient: (payload) =>
-    http.post('/auth/register', {
-      ...payload,
-      role: 'cliente',
-    }),
+  registerClient: (payload) => http.post('/auth/register', payload),
 };

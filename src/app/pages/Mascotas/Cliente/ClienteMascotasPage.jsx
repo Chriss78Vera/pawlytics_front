@@ -1,74 +1,82 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { AlertCircle, Plus, RefreshCw } from 'lucide-react';
-import { MascotaForm } from '../../../components/MascotaForm.jsx';
-import { pawlyticsApi } from '../../../service/pawlyticsApi.js';
-import { fallbackMascotas, normalizeMascotas, normalizePagination } from '../shared/mascotasUtils.js';
-import { MascotasTable } from '../shared/MascotasTable.jsx';
-import { SearchableSelect } from '../../../components/selectors/SearchableSelect.jsx';
-import { usePetCatalogOptions } from '../../../components/selectors/usePetCatalogOptions.js';
+import { MascotaForm } from '@/app/pages/Mascotas/components/MascotaForm';
+import { useNotifications } from '@/app/context/NotificationsContext.jsx';
+import { useMascotasList } from '@/app/hooks/useMascotasList.js';
+import { MascotasFilters } from '@/app/pages/Mascotas/shared/MascotasFilters.jsx';
+import { MascotasTable } from '@/app/pages/Mascotas/shared/MascotasTable.jsx';
+import { pawlyticsApi } from '@/app/service/pawlyticsApi.js';
+import { DiagnosticosMascota } from './DiagnosticosMascota.jsx';
 
-const initialFilters = {
-  search: '',
-  typeId: '',
-  breedId: '',
-  sex: '',
-};
-
-export function ClienteMascotasPage({ user, initialView = 'list', onHistory }) {
+export function ClienteMascotasPage({
+  user,
+  initialView = 'list',
+  onHistory,
+  title = 'Mascotas',
+  description = 'Estas son tus mascotas registradas.',
+}) {
   const [view, setView] = useState(initialView);
-  const [mascotas, setMascotas] = useState([]);
-  const [filters, setFilters] = useState(initialFilters);
-  const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState(normalizePagination());
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState('');
-
-  const loadMascotas = async (nextPage = page) => {
-    setIsLoading(true);
-    setErrorMessage('');
-
-    try {
-      const response = await pawlyticsApi.getMascotasByUserData(user.userDataId, { page: nextPage, limit: 5, filters });
-      const items = normalizeMascotas(response);
-      setMascotas(items);
-      setPagination(normalizePagination(response, items.length));
-    } catch {
-      setMascotas(fallbackMascotas);
-      setPagination(normalizePagination(null, fallbackMascotas.length));
-      setErrorMessage('No se pudo cargar la informacion actualizada.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadMascotas();
-  }, [user.userDataId, page]);
+  const [selectedMascota, setSelectedMascota] = useState(null);
+  const { notify } = useNotifications();
+  const {
+    mascotas,
+    filters,
+    updateFilter,
+    setPage,
+    pagination,
+    isLoading,
+    errorMessage,
+    loadMascotas,
+    applyFilters,
+    prependMascota,
+  } = useMascotasList({ mode: 'client', userDataId: user.userDataId });
 
   const handleMascotaCreated = (createdMascota) => {
-    const createdItems = normalizeMascotas(createdMascota);
-
-    if (createdItems.length) {
-      setMascotas((current) => [...createdItems, ...current].slice(0, 5));
-    } else {
-      loadMascotas(1);
-    }
-
-    setPage(1);
+    prependMascota(createdMascota);
     setView('list');
+    notify({
+      title: 'Mascota registrada',
+      message: 'La mascota se creo correctamente.',
+      type: 'success',
+    });
   };
 
-  const updateFilter = (field, value) => {
-    setFilters((current) => ({
-      ...current,
-      [field]: value,
-      ...(field === 'typeId' ? { breedId: '' } : {}),
-    }));
-  };
+  const downloadClinicalReport = async (mascota) => {
+    const reportWindow = window.open('', '_blank');
 
-  const applyFilters = () => {
-    setPage(1);
-    loadMascotas(1);
+    try {
+      if (!reportWindow) {
+        throw new Error('El navegador bloqueo la ventana del reporte.');
+      }
+
+      reportWindow.document.write('<p style="font-family: Arial; padding: 24px;">Generando reporte Pawlytics...</p>');
+      const response = await fetch(pawlyticsApi.getMascotaClinicalReportUrl(mascota.id));
+
+      if (!response.ok) {
+        throw new Error('No se pudo generar el reporte.');
+      }
+
+      const html = await response.text();
+
+      reportWindow.document.open();
+      reportWindow.document.write(html);
+      reportWindow.document.close();
+      reportWindow.focus();
+      setTimeout(() => reportWindow.print(), 500);
+
+      notify({
+        title: 'Reporte listo',
+        message: `El reporte de ${mascota.name} esta listo para guardar como PDF.`,
+        type: 'success',
+      });
+    } catch (error) {
+      reportWindow?.close();
+      notify({
+        title: 'Error al generar reporte',
+        message: error.message || 'No se pudo descargar el reporte clinico.',
+        type: 'error',
+      });
+    }
   };
 
   if (view === 'create') {
@@ -87,12 +95,24 @@ export function ClienteMascotasPage({ user, initialView = 'list', onHistory }) {
     );
   }
 
+  if (view === 'diagnosis' && selectedMascota) {
+    return (
+      <DiagnosticosMascota
+        mascota={selectedMascota}
+        onBack={() => {
+          setSelectedMascota(null);
+          setView('list');
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#462255]">Mascotas</h1>
-          <p className="text-[#313B72]">Estas son tus mascotas registradas.</p>
+          <h1 className="text-3xl font-bold text-[#462255]">{title}</h1>
+          <p className="text-[#313B72]">{description}</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -127,67 +147,12 @@ export function ClienteMascotasPage({ user, initialView = 'list', onHistory }) {
         pagination={pagination}
         onPageChange={setPage}
         onHistory={onHistory}
+        onDiagnosis={(mascota) => {
+          setSelectedMascota(mascota);
+          setView('diagnosis');
+        }}
+        onDownloadReport={downloadClinicalReport}
       />
     </div>
-  );
-}
-
-function MascotasFilters({ filters, onChange, onSubmit }) {
-  const { typeOptions, breedOptions, isLoadingTypes, isLoadingBreeds } = usePetCatalogOptions(filters.typeId);
-
-  return (
-    <div className="grid gap-3 rounded-2xl bg-white p-4 shadow border border-[#7EE081]/20 md:grid-cols-5">
-      <FilterInput label="Nombre" value={filters.search} onChange={(value) => onChange('search', value)} />
-      <SearchableSelect
-        label="Tipo"
-        value={filters.typeId}
-        onChange={(value) => onChange('typeId', value)}
-        options={typeOptions}
-        placeholder={isLoadingTypes ? 'Cargando tipos...' : 'Todos'}
-        searchPlaceholder="Buscar tipo..."
-        emptyMessage="No se encontraron tipos."
-        disabled={isLoadingTypes}
-        clearable
-      />
-      <SearchableSelect
-        label="Raza"
-        value={filters.breedId}
-        onChange={(value) => onChange('breedId', value)}
-        options={breedOptions}
-        placeholder={!filters.typeId ? 'Selecciona un tipo' : isLoadingBreeds ? 'Cargando razas...' : 'Todas'}
-        searchPlaceholder="Buscar raza..."
-        emptyMessage="No se encontraron razas."
-        disabled={!filters.typeId || isLoadingBreeds}
-        clearable
-      />
-      <SearchableSelect
-        label="Sexo"
-        value={filters.sex}
-        onChange={(value) => onChange('sex', value)}
-        options={[
-          { value: 'Macho', label: 'Macho' },
-          { value: 'Hembra', label: 'Hembra' },
-        ]}
-        placeholder="Todos"
-        searchPlaceholder="Buscar sexo..."
-        clearable
-      />
-      <button onClick={onSubmit} className="self-end rounded-xl bg-[#62A87C] px-4 py-2 font-bold text-[#462255]">
-        Filtrar
-      </button>
-    </div>
-  );
-}
-
-function FilterInput({ label, value, onChange }) {
-  return (
-    <label className="text-sm font-semibold text-[#462255]">
-      {label}
-      <input
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-xl bg-gray-50 px-3 py-2 text-[#313B72] outline-none focus:ring-2 focus:ring-[#7EE081]"
-      />
-    </label>
   );
 }

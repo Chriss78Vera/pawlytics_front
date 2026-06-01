@@ -7,9 +7,9 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '../ui/command.jsx';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover.jsx';
-import { cn } from '../ui/utils.js';
+} from '@/app/components/ui/command.jsx';
+import { Popover, PopoverContent, PopoverTrigger } from '@/app/components/ui/popover.jsx';
+import { cn } from '@/app/components/ui/utils.js';
 
 export function normalizeSelectOptions(items, { includeAll = false, allLabel = 'Todos' } = {}) {
   const normalizedItems = normalizeList(items)

@@ -1,0 +1,77 @@
+{
+  "initialFilters": {
+    "search": "",
+    "petName": "",
+    "typeId": "",
+    "breedId": "",
+    "sex": "",
+    "owner": "",
+    "recordType": "",
+    "status": "",
+    "from": "",
+    "to": ""
+  },
+  "initialClinicalHistoryForm": {
+    "id_mascota": "",
+    "fecha_registro": "",
+    "tipo_registro": "consulta",
+    "sintoma_nombre": "",
+    "sintoma_intensidad": "media",
+    "sintoma_duracion": "",
+    "sintoma_frecuencia": "",
+    "peso": "",
+    "temperatura": "",
+    "frecuencia_cardiaca": "",
+    "frecuencia_respiratoria": "",
+    "come_normal": true,
+    "alimentacion_descripcion": "",
+    "estado_animo": "",
+    "nivel_actividad": "medio",
+    "observaciones": ""
+  },
+  "initialClinicalRecordsForm": {
+    "diet": "",
+    "sterilization": "",
+    "births": "",
+    "animals": "",
+    "vaccines": [{ "type": "", "date": "" }],
+    "dewormingType": "",
+    "dewormingDate": "",
+    "surgeryType": "",
+    "surgeryDescription": "",
+    "surgeryDate": "",
+    "diseaseName": "",
+    "diseaseTreatment": ""
+  },
+  "recordTypes": [
+    { "value": "sintomas", "label": "Sintomas" },
+    { "value": "consulta", "label": "Consulta" },
+    { "value": "vacuna", "label": "Vacuna" },
+    { "value": "tratamiento", "label": "Tratamiento" },
+    { "value": "control", "label": "Control" },
+    { "value": "otro", "label": "Otro" }
+  ],
+  "intensities": [
+    { "value": "baja", "label": "Baja" },
+    { "value": "media", "label": "Media" },
+    { "value": "alta", "label": "Alta" }
+  ],
+  "activityLevels": [
+    { "value": "bajo", "label": "Bajo" },
+    { "value": "medio", "label": "Medio" },
+    { "value": "alto", "label": "Alto" }
+  ],
+  "feedingStates": [
+    { "value": "normal", "label": "Normal" },
+    { "value": "alterada", "label": "Alterada" }
+  ],
+  "sterilizationStates": [
+    { "value": "", "label": "Sin registrar" },
+    { "value": "no", "label": "No" },
+    { "value": "si", "label": "Si" }
+  ],
+  "sexOptions": [
+    { "value": "Macho", "label": "Macho" },
+    { "value": "Hembra", "label": "Hembra" }
+  ]
+}

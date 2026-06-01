@@ -1,0 +1,17 @@
+{
+  "roles": {
+    "admin": { "id": 1, "label": "Administrador" },
+    "cliente": { "id": 2, "label": "Cliente" },
+    "veterinario": { "id": 3, "label": "Veterinario" }
+  },
+  "initialVeterinarianForm": {
+    "firstName": "",
+    "lastName": "",
+    "address": "",
+    "phone": "",
+    "identification": "",
+    "birthDate": "",
+    "email": "",
+    "password": ""
+  }
+}

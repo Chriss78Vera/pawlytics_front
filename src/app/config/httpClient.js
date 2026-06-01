@@ -1,6 +1,7 @@
 import axios from 'axios';
-
+export { API_BASE_URL };
 const API_BASE_URL = import.meta.env.VITE_PAWLYTICS_API_URL;
+
 
 export const pawlyticsHttpClient = axios.create({
   baseURL: API_BASE_URL,
